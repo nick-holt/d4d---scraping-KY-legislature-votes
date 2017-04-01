@@ -12,15 +12,19 @@ house_sponsor_main_parsed <- htmlParse("http://www.lrc.ky.gov/record/17RS/bills_
 
 # extract bill links to vector
 senate_sponsor_links <- getHTMLLinks(senate_sponsor_main_parsed)[3:251]
-house_sponsor_links <- getHTMLLinks(house_sponsor_main_parsed)[3:535]
+house_sponsor_links1 <- getHTMLLinks(house_sponsor_main_parsed)[1:100]
+house_sponsor_links2 <- getHTMLLinks(house_sponsor_main_parsed)[101:200]
+house_sponsor_links3 <- getHTMLLinks(house_sponsor_main_parsed)[201:300]
+house_sponsor_links4 <- getHTMLLinks(house_sponsor_main_parsed)[301:400]
+house_sponsor_links5 <- getHTMLLinks(house_sponsor_main_parsed)[401:535]
 
 # function to pull all sponsor names for each bill
 sponsor_scraper <- function(x) {
         master <- as.data.frame(matrix(ncol = 2))
         colnames(master) <- c("bill", "sponsors")
-        for(i in 1:length(bill_sponsor_links)) {
+        for(i in 1:length(x)) {
                 link <- bill_sponsor_links[i]
-                link_content <- htmlParse(paste0("http://www.lrc.ky.gov/record/17RS/", link)) %>% as('character')
+                link_content <- htmlParse(paste0("http://www.lrc.ky.gov/record/17RS/", link), isURL = T) %>% as('character')
                 sponsors <- str_extract_all(link_content, ">\\S+\\s+\\S+<")
                 sponsors <- str_extract_all(sponsors, "[A-Z].\\s[A-Z,a-z]{1,}")
                 sponsors <- str_extract_all(sponsors, "[A-Z,a-z].\\s[A-Z,a-z]{1,}")
@@ -38,8 +42,14 @@ sponsor_scraper <- function(x) {
         return(master)
 }
 
-house_sponsors <- sponsor_scraper(house_sponsor_links)
-senate_sponsors <- sponsor_scraper(senate_sponsor_links)
+house_sponsors1 <- sponsor_scraper(house_sponsor_links1)
+house_sponsors2 <- sponsor_scraper(house_sponsor_links2)
+house_sponsors3 <- sponsor_scraper(house_sponsor_links3)
+house_sponsors4 <- sponsor_scraper(house_sponsor_links4)
+house_sponsors5 <- sponsor_scraper(house_sponsor_links5)
+
+house_sponsors <- rbind(house_sponsors1, house_sponsors2, house_sponsors3, house_sponsors4, house_sponsors5)
+senate_sponsors <- rbinnd(sponsor_scraper(senate_sponsor_links))
 
 write_csv(house_sponsors, "house_sponsors.csv")
 write_csv(senate_sponsors, "senate_sponsors.csv")
